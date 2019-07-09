@@ -31,7 +31,7 @@ class DashZMQ(object):
     def listen(self):
         start_time = time.time()
         while True:
-            if int(time.time() - start_time) >= 30:
+            if int(time.time() - start_time) >= 40:
                 return False
             msg = self.zmqSubSocket.recv_multipart()
             topic = str(msg[0].decode("utf-8"))
@@ -59,15 +59,15 @@ class DashZMQ(object):
                 try:
                     transaction = self.dashrpc._proxy.gettransaction(h, True)
                     if transaction["instantlock"]:
-#                       self.txs.remove(h)
+                        #self.txs.remove(h)
                         retVal = self.vend.process_IS_transaction(tx=transaction)
                         if retVal == "refund_transaction":
                             continue
                         else:
                             return retVal
-#                        return True
+                        #return True
 
                 except JSONRPCException as e:
                     pass
 
-            #TODO refund if the transaction is not IS
+            

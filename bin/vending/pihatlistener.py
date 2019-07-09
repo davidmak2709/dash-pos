@@ -76,28 +76,3 @@ class PiHatListener(threading.Thread):
             elif b'cashless is on' in command:
                 self.dataQueue.put({'error': 'cashless'})
 
-'''
-dataQueue = queue.Queue()
-phl = PiHatListener(dataQueue=dataQueue)
-
-phl.start()
-phl.onThread(phl.subscribeToVMC)
-
-while True:
-    val = dataQueue.get()
-    print ('from main-thread', val)
-
-    if 'error' in val.keys():
-        if val['error'] == 'cashless':
-            phl.onThread(phl.unsubscribeToVMC)
-            time.sleep(5)
-            phl.onThread(phl.subscribeToVMC)
-
-    if 'subscribed' in val.keys():
-        if val['subscribed'] == True:
-            phl.onThread(phl.startVending)
-
-    if 'amount' in val.keys():
-        print('PRICE-> ' + str(val['amount']))
-        phl.onThread(phl.declineVending)
-'''

@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Apr 29 19:07:05 2019
-
-@author: toni
-"""
 
 import queue
 import threading
@@ -20,9 +15,6 @@ class GuiListener(threading.Thread):
         self.PORT = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.bind((self.HOST, self.PORT))
-
-    def onThread(self, function, *args, **kwargs):
-        self.functionQueue.put((function, args, kwargs))
    
     def run(self):
         while True:
@@ -46,16 +38,8 @@ class GuiListener(threading.Thread):
                 self.dataQueue.put({'gui': data.decode('utf-8')})
                 #send response
                 conn.sendall(data)
-                
-    def initScreen(self):
-        self.dataQueue.put('screen1')
-        
-    def __del__(self):
-        self.s.close()
 
 
 
-#someClass = SomeClass(queue)
-#someClass.start()
-#someClass.onThread(someClass.initScreen)
+
 

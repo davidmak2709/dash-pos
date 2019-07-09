@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon May  6 17:34:07 2019
-
-@author: toni
-"""
 
 import queue
 import PIL.Image, PIL.ImageTk
@@ -18,6 +13,7 @@ import pyqrcode
 # '127.0.0.1',65448 output
 
 DASHCOLOR = "#1C75B8"
+BGCOLOR = "#f5f6f7"
 
 class GuiVend():
     def __init__(self, master, queue, startVend):
@@ -31,22 +27,25 @@ class GuiVend():
         self.master.attributes("-fullscreen", True)
         self.master.geometry("{0}x{1}+0+0".format(self.master.winfo_screenwidth(), 
                                  self.master.winfo_screenheight()))
+        self.master.config(cursor = 'none')
+	# ukljuciti za debug
         # self.master.geometry('400x400')
         self.master.config(background="white")
         self.master.overrideredirect(True)
         self.master.focus_set()
+        
+        self.master.grid_rowconfigure(0, weight=1)
+        self.master.grid_columnconfigure(0, weight=1)
+
+        self.master.grid_rowconfigure(1, weight=2)
+        self.master.grid_columnconfigure(1, weight=2)
+
+        self.master.grid_rowconfigure(2, weight=1)
+        self.master.grid_columnconfigure(2, weight=1)
 
         
-        
-        """ Redosljed pozivanja"""
+        """ Poziv prvog screen-a """
         self.syncScreen()
-        #self.idleScreen()
-        
-        #self.selectBeverageScreen()
-        
-        #self.paymentScreen("XqHt831rFj5tr4PVjqEcJmh6VKvHP62QiM", 0.1)
-        
-        #self.finalScreen()
 
     def processIncoming(self):
         """
@@ -56,7 +55,6 @@ class GuiVend():
             try:
                 msg = self.queue.get(0)
                 # Check contents of message and do what it says
-                # TODO porcesiranje svih poruka
                 if 'gui' in msg.keys():
                     message = msg['gui'].split('-')
                     print (message)
@@ -71,128 +69,146 @@ class GuiVend():
                         self.paymentScreen(message[1], float(message[2]))                   
                     elif (message[0] == 'finalScreen'):
                         self.finalScreen()
-                 
-                
+                    elif (message[0] == 'waitingScreen'):
+                        self.waitingScreen()
+
             except queue.Empty:
                 pass
     
     def syncScreen(self):
         self.clear()
-        #canvas = tk.Canvas(self.master, width=480, height=800, background="white")
         topLabel = tk.Label(self.master, text = "Loading ...".upper(),
                           font =('Verdana', 32, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-        topLabel.config(background="white")
+        topLabel.config(background=BGCOLOR)
         topLabel.pack(expand= True)
-        #canvas.pack()
         return
  
     
     def idleScreen(self):
-        self.clear()
-        #canvas = tk.Canvas(self.master, width=480, height=800, background="white")
-        topLabel = tk.Label(self.master, text = "BUY WITH:",
-                          font =('Verdana', 32, 'bold','italic'),
-                          foreground= DASHCOLOR,
-                              anchor="center")
-        topLabel.config(background="white")
-        topLabel.pack(padx = 30., pady = 50)
+       self.clear()
+       topLabel = tk.Label(self.master, text = "BUY WITH:",
+                    font =('Verdana', 32, 'bold','italic'),
+                    foreground= DASHCOLOR,
+                    anchor="center")
+       topLabel.config(background="white")
+       topLabel.grid(row= 0,column= 0, columnspan= 3, padx= 30, pady= 50)
         
-        width = 300
-        height = 100
-        img = PIL.Image.open("images/logo.png")
-        img = img.resize((width,height), PIL.Image.ANTIALIAS)
-        photoImg =  PIL.ImageTk.PhotoImage(img)
-        dashButton = tk.Button(self.master,image=photoImg, command=self.startVend, 
-                        width=420, height=200, highlightbackground=DASHCOLOR,
-                        activebackground="#e9edf5", highlightcolor=DASHCOLOR, 
-                        highlightthickness=3, bd=0)
+       buttonWidth = 300
+       buttonHeight = 100
+       img = PIL.Image.open("images/logo.png")
+       img = img.resize((buttonWidth, buttonHeight), PIL.Image.ANTIALIAS)
+       photoDashLogo =  PIL.ImageTk.PhotoImage(img)
+       
+       dashButton = tk.Button(self.master,image=photoDashLogo, command=self.startVend,
+                       width=420, height=200, highlightbackground=DASHCOLOR,
+                       activebackground="#e9edf5", highlightcolor=DASHCOLOR, 
+                       highlightthickness=3, bd=0, relief= "raised")
         
-        dashButton.config(background= "white")
-        dashButton.image = photoImg
-        dashButton.pack(padx = 30., pady = 50)
-        
-        
-        # sve ispod ne treba ako nećemo imati žetonjeru
-        """
-        midLabel = tk.Label(self.master, text = "OR",
-                          font =('Verdana', 32, 'bold','italic'),
-                          foreground= DASHCOLOR,
-                              anchor="center")
-        midLabel.config(background="white")
-        midLabel.pack()
-     
-        
-        width = 200
-        height = 90
-        img = PIL.Image.open("cash.png")
-        img = img.resize((width,height), PIL.Image.ANTIALIAS)
-        photoImg =  PIL.ImageTk.PhotoImage(img)
-        cashButton = tk.Button(self.master, text= "Cash",image=photoImg, command=self.startVend, 
-                        width=420, height=200)
-        cashButton.config(background= "white")
-        cashButton.image = photoImg
-        cashButton.pack()
-        ##
-        """
-        #canvas.pack()
-        return
+       dashButton.config(background= "white")
+       dashButton.image = photoDashLogo
+       dashButton.grid(row= 1, column= 0, columnspan= 3, padx= 30, pady= 50)
+       
+       self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
+       return
     
     def selectBeverageScreen(self):
          self.clear()
-         #canvas = tk.Canvas(self.master, width=480, height=800, background="white")
          message = "select your\n favourite\n beverage"
          label = tk.Label(self.master, text = message.upper(),
                           font =('Verdana', 32, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-         label.config(background="white")
+         label.config(background=BGCOLOR)
          label.pack(expand = 1)
-         #canvas.pack()
          return
    
     def paymentScreen(self, address, amount): 
-        self.clear()
-       # canvas = tk.Canvas(self.master, width=480, height=800, background="white")
-        topLabel = tk.Label(self.master, text = "SEND\n" + str(amount) +" DASH = X HRK",
-                          font =('Verdana', 32, 'bold','italic'),
+        self.clear() 
+        topLabel = tk.Label(self.master, text = "SEND\n" + str(amount) +" DASH",
+                          font =('Verdana', 30, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-        topLabel.config(background="white")
+        topLabel.config(background=BGCOLOR)
         topLabel.pack(padx = 20, pady = 20)
 
 
         code = pyqrcode.create('dash:'+address+'?amount='+str(amount)+'&label=DLT&IS=1')
         codeXBM = code.xbm(scale=8) 
         codeBMP = tk.BitmapImage(data=codeXBM)
-        codeBMP.config(background="white")
+        codeBMP.config(background=BGCOLOR)
         
         qrCode = tk.Label(self.master,image=codeBMP, relief="flat")
         qrCode.image = codeBMP
         qrCode.pack(padx = 20, pady = 20)
 
-        addressLabel = tk.Label(self.master, text = address,
-                          font =('Verdana', 16, 'bold','italic'),
+        addressLabel = tk.Label(self.master, text = "Scan QR code for\n payment".upper(),
+                          font =('Verdana', 22, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-        addressLabel.config(background="white")
+        addressLabel.config(background=BGCOLOR)
         addressLabel.pack(padx = 20, pady = 20)
-        #canvas.pack()
         return
     
+    def waitingScreen(self):
+        self.clear()
+        topLabel = tk.Label(self.master, text = "LOOKING FOR YOUR \n TRANSACTION...",
+                          font =('Verdana', 28, 'bold','italic'),
+                          foreground= DASHCOLOR,
+                              anchor="center")
+        topLabel.config(background=BGCOLOR)
+        topLabel.pack(expand= True)
+        return
+
     def finalScreen(self):
         self.clear()
-        #canvas = tk.Canvas(self.master, width=480, height=800, background="white")
         topLabel = tk.Label(self.master, text = "THANK YOU!",
                           font =('Verdana', 32, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-        topLabel.config(background="white")
+        topLabel.config(background=BGCOLOR)
         topLabel.pack(expand= True)
-        #canvas.pack()
-    
         return
+
+    def defaultFooter(self):        
+        frame = tk.Frame(self.master)
+        frame.config(background= BGCOLOR)
+        frame.grid_rowconfigure(0, weight=1)
+        for i in range(3):
+            frame.grid_columnconfigure(i, weight=1)
+        
+        logoWidth = 80
+        logoHeight = 80
+       
+        img = PIL.Image.open("images/auto_logo.png")
+        img = img.resize((logoWidth + 20, logoHeight), PIL.Image.ANTIALIAS)
+        photoAutoLogo =  PIL.ImageTk.PhotoImage(img)
+       
+        autoLabel = tk.Label(frame, image = photoAutoLogo)
+        autoLabel.image = photoAutoLogo
+        autoLabel.config(background= BGCOLOR)
+        autoLabel.grid(row= 0, column= 0, padx= 30, pady= 0)
+       
+        img = PIL.Image.open("images/riteh_logo.gif")
+        img = img.resize((100, 100), PIL.Image.ANTIALIAS)
+        photoRitehLogo =  PIL.ImageTk.PhotoImage(img)
+       
+        ritehLabel = tk.Label(frame, image = photoRitehLogo)
+        ritehLabel.image = photoRitehLogo
+        ritehLabel.config(background= BGCOLOR)
+        ritehLabel.grid(row= 0, column= 1, padx= 30, pady= 0)
+       
+        img = PIL.Image.open("images/qibixx_logo.png")
+        img = img.resize((logoWidth, logoHeight), PIL.Image.ANTIALIAS)
+        photoQibixxLogo =  PIL.ImageTk.PhotoImage(img)
+        
+        qibixxLabel = tk.Label(frame, image = photoQibixxLogo)
+        qibixxLabel.image = photoQibixxLogo
+        qibixxLabel.config(background= BGCOLOR)
+        qibixxLabel.grid(row= 0, column= 2, padx= 30, pady= 0)
+        
+        return frame
     
     def clear(self):
         for widget in self.master.winfo_children():
@@ -243,9 +259,6 @@ class ThreadedGUI:
         """
         self.gui.processIncoming()
         if not self.running:
-            # This is the brutal stop of the system. You may want to do
-            # some cleanup before actually shutting it down.
-            # TODO
             import sys
             sys.exit(1)
         self.master.after(100, self.periodicCall)

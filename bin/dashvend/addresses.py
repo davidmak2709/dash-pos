@@ -46,7 +46,7 @@ class Bip32Chain(object):
                 self.dashrpc._proxy.getreceivedbyaddress(addr))
         }
         
-        print(d)
+        info(d)
         return d
 
     def _init_next_address(self, increment=False):
@@ -62,13 +62,7 @@ class Bip32Chain(object):
                 index += 1
                 continue
             unused_found = True
-        """
-        try:    
-            r.importaddress(addr['addr'], 'bip-'+str(index), False)
-            #r.importprivkey(self.key.subkey(index).wif(),"",False)
-        except JSONRPCException as e:
-            debug("**** " + e.error['message'] + " ****")
-        """
+
         self._index_state(index)
         self.next_address = addr
 

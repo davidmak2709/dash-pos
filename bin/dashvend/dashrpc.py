@@ -29,9 +29,6 @@ class DashRPC(object):
                  conf=None
                  ):
         self.mainnet = mainnet
-        self.datadir = os.path.join(os.environ['HOME'],
-                                    '.dash', (not mainnet and 'testnet' or ''))
-        #self.conffile = conf and conf or os.path.join(self.datadir, 'dash.conf')
         self.conffile=DASHCORE_DIR + '/dash.conf'
         self.config = {}
         self.cpu_pct = simplemovingaverage(5)
@@ -80,17 +77,18 @@ class DashRPC(object):
             self._proxy.getbalance()
             self.responding = True
         except (ValueError, socket.error, httplib.CannotSendRequest) as e:
-            print(e)
+            #print(e)
             pass
         except JSONRPCException as e:
             # "loading block index"
-            # print str(e.error['message'])
+            # print(str(e.error['message']))
             pass
 
         try:
-            self.synchronised = True
+            status = self._proxy.mnsync("status")
+            self.synchronised = (status["IsSynced"] and status["IsBlockchainSynced"])
        	except (ValueError, socket.error, httplib.CannotSendRequest) as e:
-            # print "daemon offline"
+            info("daemon offline")
             pass
         except JSONRPCException as e:
             resp = str(e.error['message'])
@@ -105,11 +103,4 @@ class DashRPC(object):
 
         return (self.responding and self.synchronised)
 
-# doesn't work due to
-#            name = "%s.%s" % (self.__service_name, name)
-#        return AuthServiceProxy(self.__service_url, name, connection=self.__conn)  # noqa
-#    def __getattr__(self, attr):
-#        if getattr(self._proxy, attr):
-#            getattr(self._proxy, attr)()
-#        else:
-#            raise AttributeError
+

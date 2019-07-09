@@ -80,7 +80,7 @@ class DashRPC(object):
             self._proxy.getbalance()
             self.responding = True
         except (ValueError, socket.error, httplib.CannotSendRequest) as e:
-            # print "daemon offline"
+            print(e)
             pass
         except JSONRPCException as e:
             # "loading block index"
@@ -88,7 +88,6 @@ class DashRPC(object):
             pass
 
         try:
-            #TODO provjera ako je sinkroniziran
             self.synchronised = True
        	except (ValueError, socket.error, httplib.CannotSendRequest) as e:
             # print "daemon offline"

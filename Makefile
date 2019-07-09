@@ -20,11 +20,14 @@ dashd:
 
 setuids:
 	cp src/show_image.c bin/show_image.c
-	sed -i 's|DASHVEND_DIRECTORY|$(PWD)|' bin/show_image.c
+	cp src/trigger_relay.c bin/trigger_relay.c
+	sed -i 's|DASHVEND_DIRECTORY|$(PWD)|' bin/show_image.c bin/trigger_relay.c
 	gcc bin/show_image.c -o bin/show_image
+	gcc bin/trigger_relay.c -o bin/trigger_relay
 	sudo chown root:root bin/show_image
 	sudo chmod 4755 bin/show_image
-
+	sudo chown root:root bin/trigger_relay
+	sudo chmod 4755 bin/trigger_relay
 
 init:
 	sudo cp bin/.init.d.dashvend /etc/init.d/dashvend
@@ -36,4 +39,4 @@ init:
 clean:
 	find . -type f -name '*.pyc' -exec rm {} \;
 	find . -type f -name '*.o' -exec rm {} \;
-	sudo rm -rf repos bin/bitcoin bin/pycoin bin/bitcoinrpc	 bin/show_image
+	sudo rm -rf repos bin/bitcoin bin/pycoin bin/bitcoinrpc bin/trigger_relay bin/show_image

@@ -42,7 +42,7 @@ class DashZMQ(object):
                 msgSequence = struct.unpack('<I', msg[-1])[-1]
                 sequence = str(msgSequence)
                 print(sequence)
-
+            """
             if topic == "hashtx":
                 h = binascii.hexlify(body).decode("utf-8")
                 try:
@@ -53,16 +53,21 @@ class DashZMQ(object):
                         return True
                 except JSONRPCException as e:
                     pass
-
-            elif topic == "hashtxlock":
+            """
+            if topic == "hashtxlock":
                 h = binascii.hexlify(body).decode("utf-8")
                 try:
                     transaction = self.dashrpc._proxy.gettransaction(h, True)
                     if transaction["instantlock"]:
-                        self.txs.remove(h)
-                        self.vend.process_IS_transaction(tx=transaction)
-                        return True
+#                       self.txs.remove(h)
+                        retVal = self.vend.process_IS_transaction(tx=transaction)
+                        if retVal == "refund_transaction":
+                            continue
+                        else:
+                            return retVal
+#                        return True
 
                 except JSONRPCException as e:
                     pass
 
+            #TODO refund if the transaction is not IS

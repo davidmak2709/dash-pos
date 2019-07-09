@@ -26,7 +26,7 @@ class Vend(object):
         self.display = Display()
         self.current_address = None
         self.cost = 0
-        self.set_state(Vend.STARTUP)
+#        self.set_state(Vend.STARTUP)
 
     def get_listeners(self):
         return ('tx', self.ix.recv_tx,
@@ -55,14 +55,13 @@ class Vend(object):
 
     def set_product_cost(self, cost):
         """ set required float value to trigger sale """
-        # convert to duffs
-        self.cost = int(cost * 1e8)
+        self.cost = cost
 
     # vending processing
 
     def trigger_sale(self):
         self.set_state(Vend.SALE)
-    #    self.trigger.trigger()
+        self.trigger.trigger()
         Timer(15, lambda: self.set_state(Vend.READY), ()).start()
 
     def show_txrefund(self):
@@ -75,21 +74,26 @@ class Vend(object):
             self.state, self.current_address, float(self.cost / 1e8))
 
     def process_IS_transaction(self, tx):
-        if float(tx["amount"]) == VENDING_COST:
-            self.trigger_sale()
+        if float(tx["amount"]) == self.cost:
+#            self.trigger_sale()
+            return True
         else:
-            self._refund(tx)
+            return self._refund(tx)
 
 
     def _refund(self, tx):
         amount = float(tx["amount"])
         address = self.select_return_address(tx["txid"])
-        if amount < VENDING_COST:
+        if amount < 0:
+            return "refund_transaction"
+        elif amount < self.cost:
             self.sendtoaddress(addr = address,amount = amount)
-            self.show_txrefund()
-        elif amount > VENDING_COST:
-            self.sendtoaddress(addr = address,amount = amount - VENDING_COST)
-            self.trigger_sale()
+            return False
+#            self.show_txrefund()
+        elif amount > self.cost:
+            self.sendtoaddress(addr = address,amount = amount - self.cost)
+            return True
+#            self.trigger_sale()
 
     def sendtoaddress(self, addr, amount):
         p = self.dashrpc._proxy

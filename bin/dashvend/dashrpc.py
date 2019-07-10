@@ -77,18 +77,18 @@ class DashRPC(object):
             self._proxy.getbalance()
             self.responding = True
         except (ValueError, socket.error, httplib.CannotSendRequest) as e:
-            #print(e)
+            info(e)
             pass
         except JSONRPCException as e:
             # "loading block index"
-            # print(str(e.error['message']))
+            info(e)
             pass
 
         try:
             status = self._proxy.mnsync("status")
             self.synchronised = (status["IsSynced"] and status["IsBlockchainSynced"])
        	except (ValueError, socket.error, httplib.CannotSendRequest) as e:
-            info("daemon offline")
+            info(e)
             pass
         except JSONRPCException as e:
             resp = str(e.error['message'])

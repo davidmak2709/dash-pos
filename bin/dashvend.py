@@ -13,12 +13,13 @@ from dashvend.dash_zmq import DashZMQ # dash network monitor
 from dashvend.vend import Vend  # main app and hardware interface
 from dashvend.config import MAINNET  # dash network to use
 from dashvend.config import DRINK_IDS # dict {name : id}
+from dashvend.config import DASHVEND_DIR 
 from vending.pihatlistener import PiHatListener 
 from gui.client import Client
 from gui.guilistener import GuiListener
 
 def conversion(config, amount):
-    config.read('conversion/rates.ini')
+    config.read(DASHVEND_DIR + '/bin/conversion/rates.ini')
     return round(amount / float(config['rates']['dash']), 5)
 
 transaction_done = False
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     info("connecting to dashd, waiting for masternode and budget sync")
     dashrpc.connect()
     while(not dashrpc.ready()):
-        time.sleep(60)
+        time.sleep(10)
         
     bip32 = Bip32Chain(mainnet=MAINNET, dashrpc=dashrpc)
 
@@ -81,14 +82,14 @@ if __name__ == "__main__":
             dashrpc.connect()
             info("waiting for dashd to finish synchronizing")
             while(not dashrpc.ready()):
-                time.sleep(30)
+                time.sleep(10)
             c.sendMessage('idleScreen')
 
 
         if 'error' in msg.keys():
             if msg['error'] == 'cashless':
                 phl.cashless_counter += 1
-                if phl.cashless_counter == 3:
+                if phl.cashless_counter == 2:
                     c.sendMessage('syncScreen')
                     phl.onThread(phl.unsubscribeToVMC)
                     time.sleep(10)
@@ -138,7 +139,7 @@ if __name__ == "__main__":
                 phl.onThread(phl.confirmVending)
                 c.sendMessage('finalScreen')
                 time.sleep(30)
-                c.sendMessage('idleScreen')
+#                c.sendMessage('idleScreen')
             else:
                 phl.onThread(phl.declineVending)
                 c.sendMessage('idleScreen')

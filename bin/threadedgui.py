@@ -4,17 +4,19 @@
 import queue
 import PIL.Image, PIL.ImageTk
 import tkinter as tk
-from guilistener import GuiListener
+from gui.guilistener import GuiListener
+from gui.client import Client
 from screeninfo import get_monitors
 from time import sleep
-from client import Client
 import pyqrcode
+from dashvend.config import DASHVEND_DIR
+
 # '127.0.0.1',65449 input
 # '127.0.0.1',65448 output
 
 DASHCOLOR = "#1C75B8"
 BGCOLOR = "#f5f6f7"
-
+BGCOLOR_WHITE = "#ffffff"
 class GuiVend():
     def __init__(self, master, queue, startVend):
         self.master = master
@@ -81,7 +83,7 @@ class GuiVend():
                           font =('Verdana', 32, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-        topLabel.config(background=BGCOLOR)
+        topLabel.config(background=BGCOLOR_WHITE)
         topLabel.pack(expand= True)
         return
  
@@ -92,12 +94,12 @@ class GuiVend():
                     font =('Verdana', 32, 'bold','italic'),
                     foreground= DASHCOLOR,
                     anchor="center")
-       topLabel.config(background="white")
+       topLabel.config(background=BGCOLOR_WHITE)
        topLabel.grid(row= 0,column= 0, columnspan= 3, padx= 30, pady= 50)
         
        buttonWidth = 300
        buttonHeight = 100
-       img = PIL.Image.open("images/logo.png")
+       img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/logo.png")
        img = img.resize((buttonWidth, buttonHeight), PIL.Image.ANTIALIAS)
        photoDashLogo =  PIL.ImageTk.PhotoImage(img)
        
@@ -106,7 +108,7 @@ class GuiVend():
                        activebackground="#e9edf5", highlightcolor=DASHCOLOR, 
                        highlightthickness=3, bd=0, relief= "raised")
         
-       dashButton.config(background= "white")
+       dashButton.config(background= BGCOLOR_WHITE)
        dashButton.image = photoDashLogo
        dashButton.grid(row= 1, column= 0, columnspan= 3, padx= 30, pady= 50)
        
@@ -120,8 +122,10 @@ class GuiVend():
                           font =('Verdana', 32, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-         label.config(background=BGCOLOR)
-         label.pack(expand = 1)
+         label.config(background=BGCOLOR_WHITE)
+         label.grid(row=0, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
+    
+         self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
          return
    
     def paymentScreen(self, address, amount): 
@@ -130,14 +134,14 @@ class GuiVend():
                           font =('Verdana', 30, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-        topLabel.config(background=BGCOLOR)
+        topLabel.config(background=BGCOLOR_WHITE)
         topLabel.pack(padx = 20, pady = 20)
 
 
         code = pyqrcode.create('dash:'+address+'?amount='+str(amount)+'&label=DLT&IS=1')
         codeXBM = code.xbm(scale=8) 
         codeBMP = tk.BitmapImage(data=codeXBM)
-        codeBMP.config(background=BGCOLOR)
+        codeBMP.config(background=BGCOLOR_WHITE)
         
         qrCode = tk.Label(self.master,image=codeBMP, relief="flat")
         qrCode.image = codeBMP
@@ -147,28 +151,32 @@ class GuiVend():
                           font =('Verdana', 22, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-        addressLabel.config(background=BGCOLOR)
+        addressLabel.config(background=BGCOLOR_WHITE)
         addressLabel.pack(padx = 20, pady = 20)
         return
     
     def waitingScreen(self):
         self.clear()
         topLabel = tk.Label(self.master, text = "LOOKING FOR YOUR \n TRANSACTION...",
-                          font =('Verdana', 28, 'bold','italic'),
+                          font =('Verdana', 26, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
-        topLabel.config(background=BGCOLOR)
-        topLabel.pack(expand= True)
+        topLabel.config(background=BGCOLOR_WHITE)
+        topLabel.grid(row=0, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
+    
+        self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
         return
 
     def finalScreen(self):
         self.clear()
         topLabel = tk.Label(self.master, text = "THANK YOU!",
                           font =('Verdana', 32, 'bold','italic'),
-                          foreground= DASHCOLOR,
-                              anchor="center")
-        topLabel.config(background=BGCOLOR)
-        topLabel.pack(expand= True)
+                              foreground= DASHCOLOR,anchor="center")
+
+        topLabel.config(background=BGCOLOR_WHITE)
+        topLabel.grid(row=0, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
+    
+        self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
         return
 
     def defaultFooter(self):        
@@ -181,7 +189,7 @@ class GuiVend():
         logoWidth = 80
         logoHeight = 80
        
-        img = PIL.Image.open("images/auto_logo.png")
+        img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/auto_logo.png")
         img = img.resize((logoWidth + 20, logoHeight), PIL.Image.ANTIALIAS)
         photoAutoLogo =  PIL.ImageTk.PhotoImage(img)
        
@@ -190,7 +198,7 @@ class GuiVend():
         autoLabel.config(background= BGCOLOR)
         autoLabel.grid(row= 0, column= 0, padx= 30, pady= 0)
        
-        img = PIL.Image.open("images/riteh_logo.gif")
+        img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/riteh_logo.gif")
         img = img.resize((100, 100), PIL.Image.ANTIALIAS)
         photoRitehLogo =  PIL.ImageTk.PhotoImage(img)
        
@@ -199,7 +207,7 @@ class GuiVend():
         ritehLabel.config(background= BGCOLOR)
         ritehLabel.grid(row= 0, column= 1, padx= 30, pady= 0)
        
-        img = PIL.Image.open("images/qibixx_logo.png")
+        img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/qibixx_logo.png")
         img = img.resize((logoWidth, logoHeight), PIL.Image.ANTIALIAS)
         photoQibixxLogo =  PIL.ImageTk.PhotoImage(img)
         
@@ -248,7 +256,7 @@ class ThreadedGUI:
         self.connection.start()
         #nije ni potrebno ako se stavi scree1 u konstruktor GUIVend
         #self.connection.onThread(self.connection.initScreen)
-        
+
         # Start the periodic call in the GUI to check if the queue contains
         # anything
         self.periodicCall()
@@ -277,5 +285,6 @@ class ThreadedGUI:
             print('Connecting...')
             sleep(1)
 
-client = ThreadedGUI(tk.Tk())
-client.master.mainloop()
+if __name__ == "__main__":
+    client = ThreadedGUI(tk.Tk())
+    client.master.mainloop()

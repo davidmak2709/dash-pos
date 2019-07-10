@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Jul  6 09:47:27 2019
-
-@author: toni
-"""
-
 import requests
 import configparser
 
+DASHVEND_DIR = '/home/pi/dashvend'
+ 
 response = requests.get('http://api.hnb.hr/tecajn/v1?valuta=USD')
 data = response.json()
 
@@ -25,9 +21,9 @@ dash_hrk = dash_usd * usd_hrk
 print("1 DASH = " + str(dash_hrk) + ' kn')
 
 config = configparser.ConfigParser()
-config.read('rate.ini')
-config['conversion']['rate'] = str(dash_hrk)
+config.read(DASHVEND_DIR + '/bin/conversion/rates.ini')
+config['rates']['dash'] = str(dash_hrk)
 
-with open('rate.ini', 'w') as configfile:
+with open(DASHVEND_DIR + '/bin/conversion/rates.ini', 'w') as configfile:
     config.write(configfile)
 

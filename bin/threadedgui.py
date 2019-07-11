@@ -45,6 +45,10 @@ class GuiVend():
         self.master.grid_rowconfigure(2, weight=1)
         self.master.grid_columnconfigure(2, weight=1)
 
+        self.timeVar = tk.StringVar()
+        self.timerId = None
+        """ Redosljed pozivanja"""
+        #self.syncScreen()
         
         """ Poziv prvog screen-a """
         self.syncScreen()
@@ -90,8 +94,9 @@ class GuiVend():
     
     def idleScreen(self):
        self.clear()
-       topLabel = tk.Label(self.master, text = "BUY WITH:",
-                    font =('Verdana', 32, 'bold','italic'),
+       topMessage = "PRESS HERE \nTO BUY WITH:"
+       topLabel = tk.Label(self.master, text = topMessage,
+                    font =('Verdana', 28, 'bold','italic'),
                     foreground= DASHCOLOR,
                     anchor="center")
        topLabel.config(background=BGCOLOR_WHITE)
@@ -123,8 +128,19 @@ class GuiVend():
                           foreground= DASHCOLOR,
                               anchor="center")
          label.config(background=BGCOLOR_WHITE)
-         label.grid(row=0, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
-    
+         label.grid(row=0, column=0, rowspan=1, columnspan=3, padx= 30, pady= 50)
+         
+         arrowWidth = 300
+         arrowHeight = 150
+         img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/left-arrow.png")
+         img = img.resize((arrowWidth, arrowHeight), PIL.Image.ANTIALIAS)
+         photoAutoLogo =  PIL.ImageTk.PhotoImage(img)
+        
+         arrowLabel = tk.Label(self.master, image = photoAutoLogo)
+         arrowLabel.image = photoAutoLogo
+         arrowLabel.config(background= BGCOLOR_WHITE)
+         arrowLabel.grid(row= 1, column= 0, padx= 30, pady= 0)
+         
          self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
          return
    
@@ -135,7 +151,7 @@ class GuiVend():
                           foreground= DASHCOLOR,
                               anchor="center")
         topLabel.config(background=BGCOLOR_WHITE)
-        topLabel.pack(padx = 20, pady = 20)
+        topLabel.grid(row= 0, column= 0, columnspan= 3)
 
 
         code = pyqrcode.create('dash:'+address+'?amount='+str(amount)+'&label=DLT&IS=1')
@@ -145,28 +161,62 @@ class GuiVend():
         
         qrCode = tk.Label(self.master,image=codeBMP, relief="flat")
         qrCode.image = codeBMP
-        qrCode.pack(padx = 20, pady = 20)
+        qrCode.grid(row= 1, column= 0, columnspan= 3)
 
-        addressLabel = tk.Label(self.master, text = "Scan QR code for\n payment".upper(),
+        instructionLabel = tk.Label(self.master, text = "Scan QR code for\n payment".upper(),
                           font =('Verdana', 22, 'bold','italic'),
                           foreground= DASHCOLOR,
+                          anchor="center")
+        instructionLabel.config(background=BGCOLOR_WHITE)
+        instructionLabel.grid(row= 2, column= 0, columnspan= 3)
+        
+        
+        waitingTime = 45
+        self.timeVar.set(waitingTime)
+        self.master.after(1000, self.clock, waitingTime-1)
+        timer = tk.Label(self.master, textvariable = self.timeVar,
+                          font =('Verdana', 30, 'bold','italic'),
+                          foreground= "red",
                               anchor="center")
-        addressLabel.config(background=BGCOLOR_WHITE)
-        addressLabel.pack(padx = 20, pady = 20)
+        timer.config(background=BGCOLOR_WHITE)
+        
+        timer.grid(row=3, column=0, rowspan=1, columnspan=3, padx= 30, pady= 10)
+        
+        
         return
     
     def waitingScreen(self):
         self.clear()
-        topLabel = tk.Label(self.master, text = "LOOKING FOR YOUR \n TRANSACTION...",
+        waitingTime = 15
+        self.timeVar.set(waitingTime)
+        self.master.after(1000, self.clock, waitingTime-1)
+        timer = tk.Label(self.master, textvariable = self.timeVar,
+                          font =('Verdana', 30, 'bold','italic'),
+                          foreground= "red",
+                              anchor="center")
+        timer.config(background=BGCOLOR_WHITE)
+        
+        timer.grid(row=0, column=2, rowspan=1, columnspan=1, padx= 30, pady= 10)
+        
+        topLabel = tk.Label(self.master, text = "WAITING FOR \nFUNDS...",
                           font =('Verdana', 26, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
         topLabel.config(background=BGCOLOR_WHITE)
-        topLabel.grid(row=0, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
+        topLabel.grid(row=1, column=0, rowspan=1, columnspan=3, padx= 30, pady= 25)
     
         self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
         return
 
+    def clock(self,count):
+        if count == -1:
+            self.master.after_cancel(self.timerId)
+            return
+        
+        self.timeVar.set(count)
+        self.timerId = self.master.after(1000, self.clock,count-1)
+        
+    
     def finalScreen(self):
         self.clear()
         topLabel = tk.Label(self.master, text = "THANK YOU!",

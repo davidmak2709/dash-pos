@@ -45,10 +45,12 @@ class GuiVend():
         self.master.grid_rowconfigure(2, weight=1)
         self.master.grid_columnconfigure(2, weight=1)
 
-        self.timeVar = tk.StringVar()
-        self.timerId = None
-        """ Redosljed pozivanja"""
-        #self.syncScreen()
+        self.waitingTimeVar = tk.StringVar()
+        self.waitingTimerId = None
+        
+        
+        self.paymentTimeVar = tk.StringVar()
+        self.paymentTimerId = None
         
         """ Poziv prvog screen-a """
         self.syncScreen()
@@ -132,7 +134,7 @@ class GuiVend():
          
          arrowWidth = 300
          arrowHeight = 150
-         img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/left-arrow.png")
+         img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/left_arrow.png")
          img = img.resize((arrowWidth, arrowHeight), PIL.Image.ANTIALIAS)
          photoAutoLogo =  PIL.ImageTk.PhotoImage(img)
         
@@ -172,9 +174,9 @@ class GuiVend():
         
         
         waitingTime = 45
-        self.timeVar.set(waitingTime)
-        self.master.after(1000, self.clock, waitingTime-1)
-        timer = tk.Label(self.master, textvariable = self.timeVar,
+        self.paymentTimeVar.set(waitingTime)
+        self.master.after(1000, self.paymentScreenTimer, waitingTime-1)
+        timer = tk.Label(self.master, textvariable = self.paymentTimeVar,
                           font =('Verdana', 30, 'bold','italic'),
                           foreground= "red",
                               anchor="center")
@@ -185,12 +187,22 @@ class GuiVend():
         
         return
     
+    def paymentScreenTimer(self,count):
+        if count == 0:
+            self.master.after_cancel(self.paymentTimerId)
+            return
+        
+        self.paymentTimeVar.set(count)
+        self.paymentTimerId = self.master.after(1000, self.paymentScreenTimer,count-1)
+        
+
+
     def waitingScreen(self):
         self.clear()
         waitingTime = 15
-        self.timeVar.set(waitingTime)
-        self.master.after(1000, self.clock, waitingTime-1)
-        timer = tk.Label(self.master, textvariable = self.timeVar,
+        self.waitingTimeVar.set(waitingTime)
+        self.master.after(1000, self.waitingScreenTimer, waitingTime-1)
+        timer = tk.Label(self.master, textvariable = self.waitingTimeVar,
                           font =('Verdana', 30, 'bold','italic'),
                           foreground= "red",
                               anchor="center")
@@ -208,13 +220,14 @@ class GuiVend():
         self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
         return
 
-    def clock(self,count):
-        if count == -1:
-            self.master.after_cancel(self.timerId)
+    def waitingScreenTimer(self,count):
+        if count == 0:
+            self.master.after_cancel(self.waitingTimerId)
             return
         
-        self.timeVar.set(count)
-        self.timerId = self.master.after(1000, self.clock,count-1)
+        self.waitingTimeVar.set(count)
+        self.waitingTimerId = self.master.after(1000, self.waitingScreenTimer,count-1)
+
         
     
     def finalScreen(self):

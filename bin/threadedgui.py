@@ -239,14 +239,14 @@ class ThreadedGUI:
         """
         self.master = master
 
-        # Waiting for connection to dash thread
-        self.c = self.connect()
-
         # Create the queue
         self.queue = queue.Queue()
 
         # Set up the GUI part
         self.gui = GuiVend(master, self.queue, self.startVend)
+
+        # Waiting for connection to dash thread
+        self.c = self.connect()
 
         # Set up the thread to do asynchronous I/O
         # More can be made if necessary

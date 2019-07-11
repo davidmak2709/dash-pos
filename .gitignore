@@ -9,4 +9,3 @@ bin/show_image
 bin/show_image.c
 dashvend.log
 bin/dashvend/config.py
-start_dashvend.py

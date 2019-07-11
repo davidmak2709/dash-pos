@@ -9,7 +9,7 @@ import threading
 from dashvend.logger import info  # stdout and file logging
 from dashvend.addresses import Bip32Chain  # purchase addresses
 from dashvend.dashrpc import DashRPC  # local daemon - balances/refunds
-from dashvend.dash_zmq import DashZMQ # dash network monitor
+from dashvend.dashzmq import DashZMQ # dash network monitor
 from dashvend.vend import Vend  # main app and hardware interface
 from dashvend.config import MAINNET  # dash network to use
 from dashvend.config import DRINK_IDS # dict {name : id}

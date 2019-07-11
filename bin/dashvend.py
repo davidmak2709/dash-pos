@@ -24,7 +24,7 @@ def conversion(config, amount):
 
 transaction_done = False
 def waiting_screen():
-    time.sleep(30)
+    time.sleep(45)
     if transaction_done:
         pass
     else:

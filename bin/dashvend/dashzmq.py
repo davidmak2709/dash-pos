@@ -31,7 +31,7 @@ class DashZMQ(object):
     def listen(self):
         start_time = time.time()
         while True:
-            if int(time.time() - start_time) >= 40:
+            if int(time.time() - start_time) >= 60:
                 return False
             msg = self.zmqSubSocket.recv_multipart()
             topic = str(msg[0].decode("utf-8"))

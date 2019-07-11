@@ -47,6 +47,5 @@ BIP32_MAINNET_SEED = 'YOUR MAINNET SEED' # noqa
 BIP32_TESTNET_SEED = 'YOUR TESTNET SEED' # noqa
 # ku -n tDASH -s 0p/0 P:<a unique, unpublished 100 character long sentence>
 
-PASSWORD = 'RPI PASSWORD'
 
 

@@ -60,7 +60,7 @@ class DashZMQ(object):
                     transaction = self.dashrpc._proxy.gettransaction(h, True)
                     if transaction["instantlock"]:
                         #self.txs.remove(h)
-                        retVal = self.vend.process_IS_transaction(tx=transaction)
+                        retVal = self.vend.process_IS_transaction(transaction, start_time)
                         if retVal == "refund_transaction":
                             continue
                         else:

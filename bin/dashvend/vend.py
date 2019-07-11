@@ -32,8 +32,10 @@ class Vend(object):
 
     # vending processing
 
-    def process_IS_transaction(self, tx):
-        if float(tx["amount"]) == self.cost:
+    def process_IS_transaction(self, tx, start_time):
+        if float(tx["time"]) < start_time:
+            return self._refundall(tx)
+        elif float(tx["amount"]) == self.cost:
             return True
         else:
             return self._refund(tx)
@@ -44,11 +46,17 @@ class Vend(object):
         if amount < 0:
             return "refund_transaction"
         elif amount < self.cost:
-            self.sendtoaddress(addr = address,amount = amount)
+            self.sendtoaddress(addr=address, amount=amount)
             return False
         elif amount > self.cost:
-            self.sendtoaddress(addr = address,amount = amount - self.cost)
+            self.sendtoaddress(addr=address, amount=amount-self.cost)
             return True
+
+    def _refundall(self, tx):
+        amount = float(tx["amount"])
+        address = self.select_return_address(tx["txid"])
+        self.sendtoaddress(addr=address, amount=amount)
+        return "refund_transaction"
 
     def sendtoaddress(self, addr, amount):
         p = self.dashrpc._proxy

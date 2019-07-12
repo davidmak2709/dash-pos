@@ -2,7 +2,7 @@ from time import sleep
 import socket
 import os
 import subprocess
-from dashvend.config import DASHVEND_DIR, DASHD_PATH, DASHCORE_DIR, PASSWORD
+from dashvend.config import DASHVEND_DIR, DASHD_PATH, DASHCORE_DIR
 
 REMOTE_SERVER = 'www.google.com'
 

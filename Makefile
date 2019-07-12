@@ -1,8 +1,10 @@
 
-default: deps repos dashd setuids
+default: deps repos dashd
 
 deps:
-	sudo apt-get -y install vim git imagemagick fbi qrencode curl unzip screen python-setuptools
+	sudo apt-get -y install vim git python3-pil xinput python3-pil.imageTK xscreensaver unclutter curl unzip screen python-setuptools ufw
+	sudo pip3 install pyzmq	
+	pip3 install pyqrcode screeninfo
 
 repos:
 	mkdir -p repos
@@ -13,30 +15,13 @@ repos:
 	ln -f -s ../repos/python-bitcoinrpc/bitcoinrpc ../bin/bitcoinrpc; \
 	ln -f -s ../repos/pycoin/pycoin ../bin/pycoin; \
 	ln -f -s ../repos/python-bitcoinlib/bitcoin ../bin/bitcoin; \
-	cd pycoin; sudo python setup.py install
+	cd pycoin; \
+	git reset --hard "994c4c714f599c795f4b7d7f305926ca6cdd0349"; \
+	sudo python setup.py install
 
 dashd:
 	bin/_install_dashd.sh
 
-setuids:
-	cp src/show_image.c bin/show_image.c
-	cp src/trigger_relay.c bin/trigger_relay.c
-	sed -i 's|DASHVEND_DIRECTORY|$(PWD)|' bin/show_image.c bin/trigger_relay.c
-	gcc bin/show_image.c -o bin/show_image
-	gcc bin/trigger_relay.c -o bin/trigger_relay
-	sudo chown root:root bin/show_image
-	sudo chmod 4755 bin/show_image
-	sudo chown root:root bin/trigger_relay
-	sudo chmod 4755 bin/trigger_relay
-
-init:
-	sudo cp bin/.init.d.dashvend /etc/init.d/dashvend
-	sudo update-rc.d dashvend remove
-	sudo update-rc.d dashvend defaults
-	sudo update-rc.d dashvend enable
-	@# TODO bip generation
-
 clean:
 	find . -type f -name '*.pyc' -exec rm {} \;
-	find . -type f -name '*.o' -exec rm {} \;
-	sudo rm -rf repos bin/bitcoin bin/pycoin bin/bitcoinrpc bin/trigger_relay bin/show_image
+	sudo rm -rf repos bin/bitcoin bin/pycoin bin/bitcoinrpc

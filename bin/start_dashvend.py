@@ -26,8 +26,8 @@ if __name__ == "__main__":
 
     subprocess.Popen(str('sudo ' + DASHD_PATH + ' -deamon -datadir=' + DASHCORE_DIR + ' -pid=' + DASHCORE_DIR + '/dashd.pid -listen -rpcallowip=127.0.0.1 -zmqpubhashtx=tcp://127.0.0.1:10001 -zmqpubhashtxlock=tcp://127.0.0.1:10001').split(' '))
     subprocess.Popen(str('python3 ' + DASHVEND_DIR + '/bin/conversion/conversion_dash_hrk.py').split(' '))
+    subprocess.Popen(str('python3 ' + DASHVEND_DIR + '/bin/threadedgui.py').split(' '))
     sleep(1)
-#    subprocess.Popen(str('python3 ' + DASHVEND_DIR + '/bin/threadedgui.py').split(' '))
     subprocess.Popen(str('sudo python3 ' + DASHVEND_DIR + '/bin/dashvend.py').split(' '))
 
    

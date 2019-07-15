@@ -14,7 +14,7 @@ Point of sale embedded system based on Dash cryptocurrency. The whole project wa
 ## Installation
 The first thing to do is an update/upgrade:
 ```
-sudo apt-get update && apt-get upgrade
+sudo apt-get update && sudo apt-get upgrade
 ```
 Position yourself in the root of the repository and run the make command.
 ```

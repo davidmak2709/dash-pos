@@ -44,7 +44,7 @@ class Vend(object):
         amount = float(tx["amount"])
         address = self.select_return_address(tx["txid"])
         if amount < 0:
-            return "refund_transaction"
+            return False
         elif amount < self.cost:
             self.sendtoaddress(addr=address, amount=amount)
             return False
@@ -56,19 +56,21 @@ class Vend(object):
         amount = float(tx["amount"])
         address = self.select_return_address(tx["txid"])
         self.sendtoaddress(addr=address, amount=amount)
-        return "refund_transaction"
+        return False
 
     def sendtoaddress(self, addr, amount):
         p = self.dashrpc._proxy
         try:
+            amount = round(amount, 5)
             p.sendtoaddress(addr, amount)
-        except JSONRPCException:
+        except JSONRPCException as e:
             warn("**********************************************************")
             warn("INSUFFICIENT FUNDS TO PROCESS REFUND/BOUNCE FOR")
             warn("    %s to %s " % (amount, addr))
             warn("    wallet balance: %s" % (p.getbalance()))
             warn("**********************************************************")
-
+            warn(e)
+            
     def get_txn(self, txid):
         p = self.dashrpc._proxy
         return p.getrawtransaction(txid,True)

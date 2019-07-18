@@ -62,15 +62,16 @@ class DashZMQ(threading.Thread):
             """
             if topic == "hashtxlock":
                 h = binascii.hexlify(body).decode("utf-8")
-                try:
+                self.dataQueue.put({'transaction': h})
+                """try:
                     transaction = self.dashrpc._proxy.gettransaction(h, True)
                     if transaction["instantlock"]:
                         self.dataQueue.put({'transaction': transaction})
-                        """retVal = self.vend.process_IS_transaction(transaction, start_time)
+                        retVal = self.vend.process_IS_transaction(transaction, start_time)
                         if not retVal:
                             continue
                         else:
-                            return retVal"""
+                            return retVal
 
                 except JSONRPCException as e:
-                    pass
+                    pass"""

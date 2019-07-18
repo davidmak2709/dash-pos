@@ -7,6 +7,7 @@ import time
 import serial
 import select
 import sys
+from . priorityentry import PriorityEntry
 
 class PiHatListener(threading.Thread):
     subscribed = False
@@ -67,12 +68,11 @@ class PiHatListener(threading.Thread):
         for command in line:
             print (command)
             if b'ENABLED' in command:
-                self.dataQueue.put({'subscribed': True})
+                self.dataQueue.put(PriorityEntry(1, {'subscribed': True}))
             elif b'DISABLED' in command:
-                self.dataQueue.put({'subscribed': False})
+                self.dataQueue.put(PriorityEntry(1, {'subscribed': False}))
             elif b'VEND' in command:
                 ids = command.decode('utf-8').strip().split(',')[3]
-                self.dataQueue.put({'id': ids })
+                self.dataQueue.put(PriorityEntry(1, {'id': ids }))
             elif b'cashless is on' in command:
-                self.dataQueue.put({'error': 'cashless'})
-
+                self.dataQueue.put(PriorityEntry(1, {'error': 'cashless'}))

@@ -4,6 +4,7 @@
 import queue
 import threading
 import socket
+from . priorityentry import PriorityEntry
 
 class GuiListener(threading.Thread):
     def __init__(self, port, dataQueue, loop_time = 1.0/60):
@@ -15,7 +16,7 @@ class GuiListener(threading.Thread):
         self.PORT = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.bind((self.HOST, self.PORT))
-   
+
     def run(self):
         while True:
             try:
@@ -23,7 +24,7 @@ class GuiListener(threading.Thread):
                 function(*args, **kwargs)
             except queue.Empty:
                 self.idle()
-                     
+
     def idle(self):
         self.s.listen()
         conn, addr = self.s.accept()
@@ -35,11 +36,6 @@ class GuiListener(threading.Thread):
                     break
                 #debug
                 print (data)
-                self.dataQueue.put({'gui': data.decode('utf-8')})
+                self.dataQueue.put(PriorityEntry(1, {'gui': data.decode('utf-8')}))
                 #send response
                 conn.sendall(data)
-
-
-
-
-

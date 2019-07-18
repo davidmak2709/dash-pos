@@ -6,7 +6,7 @@ import math
 import configparser
 import threading
 
-from dashvend.logger import info, warn  # stdout and file logging
+from dashvend.logger import info # stdout and file logging
 from dashvend.addresses import Bip32Chain  # purchase addresses
 from dashvend.dashrpc import DashRPC  # local daemon - balances/refunds
 from dashvend.dashzmq import DashZMQ # dash network monitor
@@ -23,12 +23,12 @@ def conversion(config, amount):
     config.read(DASHVEND_DIR + '/bin/conversion/rates.ini')
     return round(amount / float(config['rates']['dash']), 5)
 
-transaction_done = False
+start_time = 0
+waiting_transaction = False
+
 def waiting_screen():
     time.sleep(45)
-    if transaction_done:
-        pass
-    else:
+    if waiting_transaction:
         c.sendMessage('waitingScreen')
 
 if __name__ == "__main__":
@@ -37,10 +37,8 @@ if __name__ == "__main__":
     dashrpc = DashRPC(mainnet=MAINNET)
 
     vend = Vend()
-    #dashzmq.connect()
-    #dashzmq.set_vend(vend)
 
-    dataQueue = queue.Queue()
+    dataQueue = queue.PriorityQueue()
 
     #init GUI
     listener = GuiListener(65448, dataQueue)
@@ -71,15 +69,12 @@ if __name__ == "__main__":
     phl.start()
     phl.onThread(phl.subscribeToVMC)
 
-    dashzmq = DashZMQ(dataQueue=dataQueue, mainnet=MAINNET, dashrpc=dashrpc)
+    dashzmq = DashZMQ(dataQueue=dataQueue, mainnet=MAINNET)
     dashzmq.start()
 
-    start_time = 0
-    waiting_transaction = False
     while True:
-        msg = dataQueue.get()
+        msg = dataQueue.get()[1]
         info("Dequeued message: " + str(msg))
-        warn('ITERACIJA')
 
         # Reconnect procedura
         if not dashrpc.ready():
@@ -90,12 +85,10 @@ if __name__ == "__main__":
                 time.sleep(10)
             c.sendMessage('idleScreen')
 
-        warn(int(time.time() - start_time))
-        warn(waiting_transaction)
         if int(time.time() - start_time) >= 60 and waiting_transaction:
             phl.onThread(phl.declineVending)
             waiting_transaction = False
-            transaction_done = True
+
 
         if 'error' in msg.keys():
             if msg['error'] == 'cashless':
@@ -142,20 +135,8 @@ if __name__ == "__main__":
             waiting_transaction = True
             #zapocni odbrojavanje do wait screena
             #logika čekanja 45 + 15
-            transaction_done = False
             wait = threading.Thread(target=waiting_screen)
             wait.start()
-
-            """if dashzmq.listen():
-                transaction_done = True
-                info("Transaction found")
-                phl.onThread(phl.confirmVending)
-                c.sendMessage('finalScreen')
-                time.sleep(30)
-                #c.sendMessage('idleScreen')
-            else:
-                phl.onThread(phl.declineVending)
-                #c.sendMessage('idleScreen')"""
 
         if 'transaction' in msg.keys():
             try:
@@ -164,7 +145,6 @@ if __name__ == "__main__":
                     if int(time.time() - start_time) < 60:
                         retVal = vend.process_IS_transaction(transaction)
                         if retVal:
-                            transaction_done = True
                             phl.onThread(phl.confirmVending)
                             start_time = 0
                             waiting_transaction = False
@@ -173,34 +153,6 @@ if __name__ == "__main__":
                     else:
                         vend._refundall(transaction)
             except JSONRPCException as e:
-                warn(e)
-
-
-
-
-            """if int(time.time() - start_time) < 60:
-                try:
-                    transaction = self.dashrpc._proxy.gettransaction(h, True)
-                    if transaction["instantlock"]:
-
-                except JSONRPCException as e:
-                    pass
-                retVal = vend.process_IS_transaction(msg['transaction'])
-                if retVal:
-                    transaction_done = True
-                    phl.onThread(phl.confirmVending)
-                    start_time = 0
-                    waiting_transaction = False
-                    c.sendMessage('finalScreen')
-                    time.sleep(30)
-            else:
-                vend._refundall(msg['transaction'])"""
-
-        """info(int(time.time() - start_time))
-        info(waiting_transaction)
-        if int(time.time() - start_time) >= 60 and waiting_transaction:
-            phl.onThread(phl.declineVending)
-            waiting_transaction = False
-            transaction_done = True"""
+                info(e)
 
         time.sleep(1)

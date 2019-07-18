@@ -32,10 +32,8 @@ class Vend(object):
 
     # vending processing
 
-    def process_IS_transaction(self, tx, start_time):
-        if float(tx["time"]) < start_time:
-            return self._refundall(tx)
-        elif float(tx["amount"]) == self.cost:
+    def process_IS_transaction(self, tx):
+        if float(tx["amount"]) == self.cost:
             return True
         else:
             return self._refund(tx)
@@ -70,7 +68,7 @@ class Vend(object):
             warn("    wallet balance: %s" % (p.getbalance()))
             warn("**********************************************************")
             warn(e)
-            
+
     def get_txn(self, txid):
         p = self.dashrpc._proxy
         return p.getrawtransaction(txid,True)

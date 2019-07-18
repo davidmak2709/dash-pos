@@ -2,20 +2,26 @@ import zmq
 import binascii
 import struct
 import time
+import threading
+import queue
 from bitcoinrpc.authproxy import JSONRPCException
 
-class DashZMQ(object):
+class DashZMQ(threading.Thread):
 
-    def __init__(self, mainnet=False, host="tcp://127.0.0.1", port=10001,dashrpc=None):
+    def __init__(self, dataQueue, dashrpc, loop_time = 1.0/60, mainnet=False, host="tcp://127.0.0.1", port=10001):
+        self.functionQueue = queue.Queue()
+        self.dataQueue = dataQueue
+        self.timeout = loop_time
+
         self.host = host
         self.port = port
-        self.txs = []
 
         self.dashrpc = dashrpc
-        if self.dashrpc is None:
-            # TODO: set new dashRPC connection
-            print("DashRPC not set")
+        self.connect()
+        super(DashZMQ, self).__init__()
 
+    def run(self):
+        self.listen()
 
     def connect(self):
         self.zmqContext = zmq.Context()
@@ -29,10 +35,10 @@ class DashZMQ(object):
         self.vend = vend
 
     def listen(self):
-        start_time = time.time()
+        #start_time = time.time()
         while True:
-            if int(time.time() - start_time) >= 60:
-                return False
+            #if int(time.time() - start_time) >= 60:
+                #return False
             msg = self.zmqSubSocket.recv_multipart()
             topic = str(msg[0].decode("utf-8"))
             body = msg[1]
@@ -59,11 +65,12 @@ class DashZMQ(object):
                 try:
                     transaction = self.dashrpc._proxy.gettransaction(h, True)
                     if transaction["instantlock"]:
-                        retVal = self.vend.process_IS_transaction(transaction, start_time)
+                        self.dataQueue.put({'transaction': transaction})
+                        """retVal = self.vend.process_IS_transaction(transaction, start_time)
                         if not retVal:
                             continue
                         else:
-                            return retVal
+                            return retVal"""
 
                 except JSONRPCException as e:
                     pass

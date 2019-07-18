@@ -73,7 +73,7 @@ if __name__ == "__main__":
     dashzmq.start()
 
     while True:
-        msg = dataQueue.get()[1]
+        msg = dataQueue.get().data
         info("Dequeued message: " + str(msg))
 
         # Reconnect procedura
@@ -121,7 +121,7 @@ if __name__ == "__main__":
                     choice = k
             amount = math.floor(float(msg['id']))
             # konverzija u dash
-            dash_amount = conversion(config, amount-1.7)
+            dash_amount = conversion(config, amount)
             vend.set_product_cost(dash_amount)  # set product cost in dash
 
             info('ID-> ' + str(msg['id']))

@@ -61,7 +61,7 @@ class GuiVend():
         """
         while self.queue.qsize():
             try:
-                msg = self.queue.get(0)
+                msg = self.queue.get(0).data
                 # Check contents of message and do what it says
                 if 'gui' in msg.keys():
                     message = msg['gui'].split('-')

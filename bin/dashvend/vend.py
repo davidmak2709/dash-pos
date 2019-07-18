@@ -59,7 +59,7 @@ class Vend(object):
     def sendtoaddress(self, addr, amount):
         p = self.dashrpc._proxy
         try:
-            amount = round(amount, 5)
+            amount = abs(round(amount, 5))
             p.sendtoaddress(addr, amount)
         except JSONRPCException as e:
             warn("**********************************************************")

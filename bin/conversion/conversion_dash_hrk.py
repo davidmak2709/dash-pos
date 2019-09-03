@@ -3,8 +3,8 @@
 import requests
 import configparser
 
-DASHVEND_DIR = '/home/pi/dashvend'
- 
+DASHVEND_DIR = '/home/pi/dash-pos'
+
 response = requests.get('http://api.hnb.hr/tecajn/v1?valuta=USD')
 data = response.json()
 
@@ -26,4 +26,3 @@ config['rates']['dash'] = str(dash_hrk)
 
 with open(DASHVEND_DIR + '/bin/conversion/rates.ini', 'w') as configfile:
     config.write(configfile)
-

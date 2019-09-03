@@ -24,8 +24,8 @@ Edit the [config](./bin/dashvend/config.py.template) file and set your variables
 
 Place the following commands in crontab:
 ```
-@reboot python3 <path-to-dashvend>/dashvend/bin/start_dashvend.py
-0 */1 * * * python3 <path-to-dashvend>/dashvend/bin/conversion/conversion_dash_hrk.py
+@reboot python3 <path-to-dash-pos>/dash-pos/bin/start_dashvend.py
+0 */1 * * * python3 <path-to-dash-pos>/dash-pos/bin/conversion/conversion_dash_hrk.py
 ```
 Conversion only works for HRK (Croatian kunas)
 
@@ -48,7 +48,7 @@ display_rotate=1 # or different numbers depending on the orientation
 Finally, in /etc/xdg/lxsession/LXDE-pi/autostart place the following lines:
 ```bash
 @unclutter -idle 0 # remove mouse pointer
-@<path-to-dashvend>/dashvend/bin/fliptouch.sh # flip the touch screen(change the script depending
+@<path-to-dash-pos>/dash-pos/bin/fliptouch.sh # flip the touch screen(change the script depending
 					      # on your rotation
 @xset s off # disable screen turn off after 10 minutes
 @xset -dpms # disable screen turn off after 10 minutes

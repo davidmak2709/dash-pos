@@ -3,9 +3,11 @@ rpcuser=$RPCUSER
 rpcpassword=$RPCPASS
 rpcallowip=127.0.0.1
 rpcbind=127.0.0.1
-"#----"
 listen=1
 server=1
 maxconnections=20
 printtoconsole=1
-keypool=10
+keypool=1000
+zmqpubhashtx=tcp://127.0.0.1:10001
+zmqpubhashtxlock=tcp://127.0.0.1:10001
+"#----"

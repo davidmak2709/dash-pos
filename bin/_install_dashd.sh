@@ -1,41 +1,47 @@
 #!/bin/bash
 
-if [ -e ~/.dash/dash.conf ]; then
+if [ -e ~/.dashcore/dash.conf ]; then
     exit 0
 fi
 
 echo "installing dashd"
 
-mkdir -p ~/.dash/testnet/testnet3
-cp -f bin/.dash.conf.template ~/.dash
-cd ~/.dash
+mkdir -p ~/.dashcore/testnet/testnet3
+cp -f bin/.dash.conf.template ~/.dashcore
+cd ~/.dashcore
 touch dashd.pid testnet/testnet3/dashd.pid
-if [ ! -e dashcore-0.14.0 ]; then
-    wget https://github.com/dashpay/dash/releases/download/v0.14.0.2/dashcore-0.14.0.2-arm-linux-gnueabihf.tar.gz
+cd ~
+
+if [ ! -e dash ]; then
+    mkdir dash
+    cd dash
+    wget https://github.com/dashpay/dash/releases/download/v0.14.0.3/dashcore-0.14.0.3-arm-linux-gnueabihf.tar.gz
 fi
-tar zxvf dashcore-0.14.0.2-arm-linux-gnueabihf.tar.gz
+tar zxvf dashcore-0.14.0.3-arm-linux-gnueabihf.tar.gz
+rm dashcore-0.14.0.3-arm-linux-gnueabihf.tar.gz
 ln -s dashcore-0.14.0/bin/dash-cli .
 ln -s dashcore-0.14.0/bin/dashd .
 
-export PATH=~/.dash:$PATH
-echo 'export PATH=~/.dash:$PATH' >> ~/.bashrc
+export PATH=~/dash:$PATH
+echo 'export PATH=~/dash:$PATH' >> ~/.bashrc
 
-#if [ ! -e bootstrap.dat ]; then
-#    wget https://raw.githubusercontent.com/UdjinM6/dash-bootstrap/master/links-mainnet.md -O links-mainnet.md
-#    MAINNET_BOOTSTRAP_FILE=$(head -1 links-mainnet.md | awk '{print $9}' | sed 's/.*\(http.*\.zip\).*/\1/')
-#    wget $MAINNET_BOOTSTRAP_FILE
-#    unzip ${MAINNET_BOOTSTRAP_FILE##*/}
-#    rm links-mainnet.md bootstrap.dat*.zip
-#fi
+cd ~/.dashcore
+if [ ! -e bootstrap.dat ]; then
+    wget https://raw.githubusercontent.com/UdjinM6/dash-bootstrap/master/links-mainnet.md -O links-mainnet.md
+    MAINNET_BOOTSTRAP_FILE=$(head -1 links-mainnet.md | awk '{print $9}' | sed 's/.*\(http.*\.zip\).*/\1/')
+    wget $MAINNET_BOOTSTRAP_FILE
+    unzip ${MAINNET_BOOTSTRAP_FILE##*/}
+    rm links-mainnet.md bootstrap.dat*.zip
+fi
 
 cd testnet/testnet3
-#if [ ! -e bootstrap.dat ]; then
-#    wget https://raw.githubusercontent.com/UdjinM6/dash-bootstrap/master/links-testnet.md -O links-testnet.md
-#    TESTNET_BOOTSTRAP_FILE=$(head -1 links-testnet.md | awk '{print $9}' | sed 's/.*\(http.*\.zip\).*/\1/')
-#    wget $TESTNET_BOOTSTRAP_FILE
-#    unzip ${TESTNET_BOOTSTRAP_FILE##*/}
-#    rm links-testnet.md bootstrap.dat*.zip
-#fi
+if [ ! -e bootstrap.dat ]; then
+    wget https://raw.githubusercontent.com/UdjinM6/dash-bootstrap/master/links-testnet.md -O links-testnet.md
+    TESTNET_BOOTSTRAP_FILE=$(head -1 links-testnet.md | awk '{print $9}' | sed 's/.*\(http.*\.zip\).*/\1/')
+    wget $TESTNET_BOOTSTRAP_FILE
+    unzip ${TESTNET_BOOTSTRAP_FILE##*/}
+    rm links-testnet.md bootstrap.dat*.zip
+fi
 
 # build confs
 function render_conf() {

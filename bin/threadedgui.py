@@ -27,7 +27,7 @@ class GuiVend():
         # ukljuciti u produkciji
         self.master.wm_attributes('-type', 'splash')
         self.master.attributes("-fullscreen", True)
-        self.master.geometry("{0}x{1}+0+0".format(self.master.winfo_screenwidth(), 
+        self.master.geometry("{0}x{1}+0+0".format(self.master.winfo_screenwidth(),
                                  self.master.winfo_screenheight()))
         self.master.config(cursor = 'none')
 	# ukljuciti za debug
@@ -35,7 +35,7 @@ class GuiVend():
         self.master.config(background="white")
         self.master.overrideredirect(True)
         self.master.focus_set()
-        
+
         self.master.grid_rowconfigure(0, weight=1)
         self.master.grid_columnconfigure(0, weight=1)
 
@@ -47,11 +47,11 @@ class GuiVend():
 
         self.waitingTimeVar = tk.StringVar()
         self.waitingTimerId = None
-        
-        
+
+
         self.paymentTimeVar = tk.StringVar()
         self.paymentTimerId = None
-        
+
         """ Poziv prvog screen-a """
         self.syncScreen()
 
@@ -66,15 +66,15 @@ class GuiVend():
                 if 'gui' in msg.keys():
                     message = msg['gui'].split('-')
                     print (message)
-                    
+
                     if(message[0] == 'syncScreen'):
-                        self.syncScreen()                
+                        self.syncScreen()
                     elif (message[0] == 'idleScreen'):
                         self.idleScreen()
                     elif (message[0] == 'selectBeverageScreen'):
-                        self.selectBeverageScreen()                    
+                        self.selectBeverageScreen()
                     elif (message[0] == 'paymentScreen'):
-                        self.paymentScreen(message[1], float(message[2]))                   
+                        self.paymentScreen(message[1], float(message[2]))
                     elif (message[0] == 'finalScreen'):
                         self.finalScreen()
                     elif (message[0] == 'waitingScreen'):
@@ -82,7 +82,7 @@ class GuiVend():
 
             except queue.Empty:
                 pass
-    
+
     def syncScreen(self):
         self.clear()
         topLabel = tk.Label(self.master, text = "Loading ...".upper(),
@@ -92,8 +92,8 @@ class GuiVend():
         topLabel.config(background=BGCOLOR_WHITE)
         topLabel.pack(expand= True)
         return
- 
-    
+
+
     def idleScreen(self):
        self.clear()
        topMessage = "PRESS HERE \nTO BUY WITH:"
@@ -103,25 +103,25 @@ class GuiVend():
                     anchor="center")
        topLabel.config(background=BGCOLOR_WHITE)
        topLabel.grid(row= 0,column= 0, columnspan= 3, padx= 30, pady= 50)
-        
+
        buttonWidth = 300
        buttonHeight = 100
        img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/logo.png")
        img = img.resize((buttonWidth, buttonHeight), PIL.Image.ANTIALIAS)
        photoDashLogo =  PIL.ImageTk.PhotoImage(img)
-       
+
        dashButton = tk.Button(self.master,image=photoDashLogo, command=self.startVend,
                        width=420, height=200, highlightbackground=DASHCOLOR,
-                       activebackground="#e9edf5", highlightcolor=DASHCOLOR, 
+                       activebackground="#e9edf5", highlightcolor=DASHCOLOR,
                        highlightthickness=3, bd=0, relief= "raised")
-        
+
        dashButton.config(background= BGCOLOR_WHITE)
        dashButton.image = photoDashLogo
        dashButton.grid(row= 1, column= 0, columnspan= 3, padx= 30, pady= 50)
-       
+
        self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
        return
-    
+
     def selectBeverageScreen(self):
          self.clear()
          message = "select your\n favourite\n beverage"
@@ -131,23 +131,23 @@ class GuiVend():
                               anchor="center")
          label.config(background=BGCOLOR_WHITE)
          label.grid(row=0, column=0, rowspan=1, columnspan=3, padx= 30, pady= 50)
-         
+
          arrowWidth = 300
          arrowHeight = 150
          img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/left_arrow.png")
          img = img.resize((arrowWidth, arrowHeight), PIL.Image.ANTIALIAS)
          photoAutoLogo =  PIL.ImageTk.PhotoImage(img)
-        
+
          arrowLabel = tk.Label(self.master, image = photoAutoLogo)
          arrowLabel.image = photoAutoLogo
          arrowLabel.config(background= BGCOLOR_WHITE)
          arrowLabel.grid(row= 1, column= 0, padx= 30, pady= 0)
-         
+
          self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
          return
-   
-    def paymentScreen(self, address, amount): 
-        self.clear() 
+
+    def paymentScreen(self, address, amount):
+        self.clear()
         topLabel = tk.Label(self.master, text = "SEND\n" + str(amount) +" DASH",
                           font =('Verdana', 30, 'bold','italic'),
                           foreground= DASHCOLOR,
@@ -157,10 +157,10 @@ class GuiVend():
 
 
         code = pyqrcode.create('dash:'+address+'?amount='+str(amount)+'&label=DLT&IS=1')
-        codeXBM = code.xbm(scale=8) 
+        codeXBM = code.xbm(scale=8)
         codeBMP = tk.BitmapImage(data=codeXBM)
         codeBMP.config(background=BGCOLOR_WHITE)
-        
+
         qrCode = tk.Label(self.master,image=codeBMP, relief="flat")
         qrCode.image = codeBMP
         qrCode.grid(row= 1, column= 0, columnspan= 3)
@@ -171,8 +171,8 @@ class GuiVend():
                           anchor="center")
         instructionLabel.config(background=BGCOLOR_WHITE)
         instructionLabel.grid(row= 2, column= 0, columnspan= 3)
-        
-        
+
+
         waitingTime = 45
         self.paymentTimeVar.set(waitingTime)
         self.master.after(1000, self.paymentScreenTimer, waitingTime-1)
@@ -181,20 +181,20 @@ class GuiVend():
                           foreground= "red",
                               anchor="center")
         timer.config(background=BGCOLOR_WHITE)
-        
+
         timer.grid(row=3, column=0, rowspan=1, columnspan=3, padx= 30, pady= 10)
-        
-        
+
+
         return
-    
+
     def paymentScreenTimer(self,count):
         if count == 0:
             self.master.after_cancel(self.paymentTimerId)
             return
-        
+
         self.paymentTimeVar.set(count)
         self.paymentTimerId = self.master.after(1000, self.paymentScreenTimer,count-1)
-        
+
 
 
     def waitingScreen(self):
@@ -207,16 +207,16 @@ class GuiVend():
                           foreground= "red",
                               anchor="center")
         timer.config(background=BGCOLOR_WHITE)
-        
+
         timer.grid(row=0, column=2, rowspan=1, columnspan=1, padx= 30, pady= 10)
-        
+
         topLabel = tk.Label(self.master, text = "WAITING FOR \nFUNDS...",
                           font =('Verdana', 26, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
         topLabel.config(background=BGCOLOR_WHITE)
         topLabel.grid(row=1, column=0, rowspan=1, columnspan=3, padx= 30, pady= 25)
-    
+
         self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
         return
 
@@ -225,12 +225,12 @@ class GuiVend():
             self.waitingTimeVar.set("TIME'S UP!")
             self.master.after_cancel(self.waitingTimerId)
             return
-        
+
         self.waitingTimeVar.set(count)
         self.waitingTimerId = self.master.after(1000, self.waitingScreenTimer,count-1)
 
-        
-    
+
+
     def finalScreen(self):
         self.clear()
         topLabel = tk.Label(self.master, text = "THANK YOU!",
@@ -239,49 +239,49 @@ class GuiVend():
 
         topLabel.config(background=BGCOLOR_WHITE)
         topLabel.grid(row=0, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
-    
+
         self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
         return
 
-    def defaultFooter(self):        
+    def defaultFooter(self):
         frame = tk.Frame(self.master)
         frame.config(background= BGCOLOR)
         frame.grid_rowconfigure(0, weight=1)
         for i in range(3):
             frame.grid_columnconfigure(i, weight=1)
-        
+
         logoWidth = 80
         logoHeight = 80
-       
+
         img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/auto_logo.png")
         img = img.resize((logoWidth + 20, logoHeight), PIL.Image.ANTIALIAS)
         photoAutoLogo =  PIL.ImageTk.PhotoImage(img)
-       
+
         autoLabel = tk.Label(frame, image = photoAutoLogo)
         autoLabel.image = photoAutoLogo
         autoLabel.config(background= BGCOLOR)
         autoLabel.grid(row= 0, column= 0, padx= 30, pady= 0)
-       
+
         img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/riteh_logo.gif")
         img = img.resize((100, 100), PIL.Image.ANTIALIAS)
         photoRitehLogo =  PIL.ImageTk.PhotoImage(img)
-       
+
         ritehLabel = tk.Label(frame, image = photoRitehLogo)
         ritehLabel.image = photoRitehLogo
         ritehLabel.config(background= BGCOLOR)
         ritehLabel.grid(row= 0, column= 1, padx= 30, pady= 0)
-       
+
         img = PIL.Image.open(DASHVEND_DIR + "/bin/gui/images/qibixx_logo.png")
         img = img.resize((logoWidth, logoHeight), PIL.Image.ANTIALIAS)
         photoQibixxLogo =  PIL.ImageTk.PhotoImage(img)
-        
+
         qibixxLabel = tk.Label(frame, image = photoQibixxLogo)
         qibixxLabel.image = photoQibixxLogo
         qibixxLabel.config(background= BGCOLOR)
         qibixxLabel.grid(row= 0, column= 2, padx= 30, pady= 0)
-        
+
         return frame
-    
+
     def clear(self):
         for widget in self.master.winfo_children():
             widget.destroy()

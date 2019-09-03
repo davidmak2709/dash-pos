@@ -56,7 +56,3 @@ Finally, in /etc/xdg/lxsession/LXDE-pi/autostart place the following lines:
 
 ## Video demo
 [Demonstration video](https://youtu.be/A7MZlR-G4GU)
-
-#### Donations  are always welcome
-![QR](https://drive.google.com/uc?export=view&id=1HvvJaiPD2KENB2mth5LfvRAXmH7MTAGn)
-

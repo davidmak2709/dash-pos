@@ -9,7 +9,7 @@ import requests
 import json
 
 from dashvend.logger import info # stdout and file logging
-from dashvend.addresses import Bip32Chain  # purchase addresses
+from dashvend.addresses import RPCAddress  # purchase addresses
 from dashvend.dashrpc import DashRPC  # local daemon - balances/refunds
 from dashvend.dashzmq import DashZMQ # dash network monitor
 from dashvend.vend import Vend  # main app and hardware interface
@@ -81,9 +81,9 @@ if __name__ == "__main__":
     while(not dashrpc.ready()):
         time.sleep(10)
 
-    bip32 = Bip32Chain(mainnet=MAINNET, dashrpc=dashrpc)
+    rpcaddress = RPCAddress(mainnet=MAINNET, dashrpc=dashrpc)
 
-    vend.set_address_chain(bip32)  # attach address chain
+    vend.set_address_chain(rpcaddress)  # attach address
     vend.set_dashrpc(dashrpc)  # attach local wallet for refunds
 
     phl = PiHatListener(dataQueue=dataQueue)

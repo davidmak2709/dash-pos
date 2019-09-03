@@ -5,6 +5,8 @@ import queue
 import math
 import configparser
 import threading
+import requests
+import json
 
 from dashvend.logger import info # stdout and file logging
 from dashvend.addresses import Bip32Chain  # purchase addresses
@@ -14,22 +16,42 @@ from dashvend.vend import Vend  # main app and hardware interface
 from dashvend.config import MAINNET  # dash network to use
 from dashvend.config import DRINK_IDS # dict {name : id}
 from dashvend.config import DASHVEND_DIR
+from dashvend.config import MACHINE_ID
+from dashvend.config import MACHINE_API_KEY
+from dashvend.config import MACHINE_API_URL
 from vending.pihatlistener import PiHatListener
 from gui.client import Client
 from gui.guilistener import GuiListener
 from bitcoinrpc.authproxy import JSONRPCException
 
+start_time = 0
+waiting_transaction = False
+
 def conversion(config, amount):
     config.read(DASHVEND_DIR + '/bin/conversion/rates.ini')
     return round(amount / float(config['rates']['dash']), 5)
 
-start_time = 0
-waiting_transaction = False
+def post_api(choice, amount, dash_amount):
+    payload = {
+        "product": choice,
+        "amount": amount,
+        "dash_amount": dash_amount,
+        "machine": MACHINE_ID
+    }
+    headers = {"Authorization": MACHINE_API_KEY,
+               "Content-Type":"application/json"}
+    try:
+        r = requests.post(MACHINE_API_URL, data=json.dumps(payload), headers=headers)
+        info(r.content)
+    except Exception as e:
+        info(e)
+    return
 
 def waiting_screen():
     time.sleep(45)
     if waiting_transaction:
         c.sendMessage('waitingScreen')
+    return
 
 if __name__ == "__main__":
     config = configparser.ConfigParser()
@@ -149,6 +171,7 @@ if __name__ == "__main__":
                             start_time = 0
                             waiting_transaction = False
                             c.sendMessage('finalScreen')
+                            post_api(choice, amount, dash_amount)
                             time.sleep(30)
                     else:
                         vend._refundall(transaction)

@@ -222,6 +222,7 @@ class GuiVend():
 
     def waitingScreenTimer(self,count):
         if count == -1:
+            self.waitingTimeVar.set("TIME'S UP!")
             self.master.after_cancel(self.waitingTimerId)
             return
         

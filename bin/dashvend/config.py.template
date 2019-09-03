@@ -23,6 +23,10 @@ DRINK_IDS = {
  "caj" : 2.05
 }
 
+MACHINE_ID = '<YOUR-MACHINE-ID>'
+MACHINE_API_KEY = 'Api-Key <YOUR-API-KEY>'
+MACHINE_API_URL = '<YOUR-API-IP>/vending/purchases/create/'
+
 # set this to the full path to the dashvend respository checkout
 DASHVEND_DIR = '/home/pi/dashvend'
 # note: also update paths in:

@@ -16,8 +16,8 @@ def is_connected(hostname):
     return False
 
 def is_mounted():
-    return os.path.ismount('/media/pi/c1821e3d-c341-415b-ac2d-6653f1a12e3f')
-  
+    return os.path.ismount(DASHCORE_DIR)
+
 if __name__ == "__main__":
     while not (is_connected(REMOTE_SERVER) and is_mounted()):
         print('Waiting for connection and external drive...')

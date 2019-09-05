@@ -47,12 +47,6 @@ def post_api(choice, amount, dash_amount):
         info(e)
     return
 
-def waiting_screen():
-    time.sleep(45)
-    if waiting_transaction:
-        c.sendMessage('waitingScreen')
-    return
-
 if __name__ == "__main__":
     config = configparser.ConfigParser()
 
@@ -64,6 +58,8 @@ if __name__ == "__main__":
 
     #init GUI
     listener = GuiListener(65448, dataQueue)
+    #DONE
+    listener.setDaemon(True)
     listener.start()
 
     while True:
@@ -87,11 +83,14 @@ if __name__ == "__main__":
     vend.set_dashrpc(dashrpc)  # attach local wallet for refunds
 
     phl = PiHatListener(dataQueue=dataQueue)
-
+    #DONE
+    phl.setDaemon(True)
     phl.start()
     phl.onThread(phl.subscribeToVMC)
 
     dashzmq = DashZMQ(dataQueue=dataQueue, mainnet=MAINNET)
+    #DONE
+    dashzmq.setDaemon(True)
     dashzmq.start()
 
     while True:
@@ -107,9 +106,8 @@ if __name__ == "__main__":
                 time.sleep(10)
             c.sendMessage('idleScreen')
 
-        if int(time.time() - start_time) >= 60 and waiting_transaction:
+        if int(time.time() - start_time) >= 60:
             phl.onThread(phl.declineVending)
-            waiting_transaction = False
 
 
         if 'error' in msg.keys():
@@ -154,11 +152,7 @@ if __name__ == "__main__":
 
             c.sendMessage('paymentScreen-' + vend.current_address + '-' + str(dash_amount))
             start_time = time.time()
-            waiting_transaction = True
-            #zapocni odbrojavanje do wait screena
-            #logika čekanja 45 + 15
-            wait = threading.Thread(target=waiting_screen)
-            wait.start()
+
 
         if 'transaction' in msg.keys():
             try:
@@ -166,15 +160,21 @@ if __name__ == "__main__":
                 if transaction['instantlock']:
                     if int(time.time() - start_time) < 60:
                         retVal = vend.process_IS_transaction(transaction)
+                        #TODO logika za preplaćeni iznos
                         if retVal:
                             phl.onThread(phl.confirmVending)
                             start_time = 0
-                            waiting_transaction = False
                             c.sendMessage('finalScreen')
                             post_api(choice, amount, dash_amount)
                             time.sleep(30)
+                        else:
+                            #DONE manji iznos
+                            c.sendMessage('refund')
                     else:
+                        #DONE neočekivani
+                        c.sendMessage('unexpected')
                         vend._refundall(transaction)
+
             except JSONRPCException as e:
                 info(e)
 

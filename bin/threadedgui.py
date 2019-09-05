@@ -10,6 +10,7 @@ from screeninfo import get_monitors
 from time import sleep
 import pyqrcode
 from dashvend.config import DASHVEND_DIR
+from threading import Timer
 
 # '127.0.0.1',65449 input
 # '127.0.0.1',65448 output
@@ -17,6 +18,8 @@ from dashvend.config import DASHVEND_DIR
 DASHCOLOR = "#1C75B8"
 BGCOLOR = "#f5f6f7"
 BGCOLOR_WHITE = "#ffffff"
+NOTIFICATION_BGCOLOR = "#edeff2"
+
 class GuiVend():
     def __init__(self, master, queue, startVend):
         self.master = master
@@ -45,12 +48,16 @@ class GuiVend():
         self.master.grid_rowconfigure(2, weight=1)
         self.master.grid_columnconfigure(2, weight=1)
 
+        self.master.grid_rowconfigure(3, weight=1)
+        self.master.grid_columnconfigure(3, weight=1)
+
         self.waitingTimeVar = tk.StringVar()
         self.waitingTimerId = None
 
 
         self.paymentTimeVar = tk.StringVar()
         self.paymentTimerId = None
+        self.waitingThread = None
 
         """ Poziv prvog screen-a """
         self.syncScreen()
@@ -76,9 +83,22 @@ class GuiVend():
                     elif (message[0] == 'paymentScreen'):
                         self.paymentScreen(message[1], float(message[2]))
                     elif (message[0] == 'finalScreen'):
-                        self.finalScreen()
+                        #DONE
+                        if self.waitingThread.isAlive():
+                            self.waitingThread.cancel()
+                            self.finalScreen()
+
                     elif (message[0] == 'waitingScreen'):
                         self.waitingScreen()
+
+                    #DONE notifications
+                    elif (message[0] == 'refund'):
+                        self.notification("Insufficient amount")
+                    elif (message[0] == 'overpaid'):
+                        self.notification("Overpaid!\nRefunding the remainder")
+                    elif (message[0] == 'unexpected'):
+                         self.notification("Unknown transaction received.\nRefunding...")
+
 
             except queue.Empty:
                 pass
@@ -96,13 +116,15 @@ class GuiVend():
 
     def idleScreen(self):
        self.clear()
+       self.notificationBar()
+
        topMessage = "PRESS HERE \nTO BUY WITH:"
        topLabel = tk.Label(self.master, text = topMessage,
                     font =('Verdana', 28, 'bold','italic'),
                     foreground= DASHCOLOR,
                     anchor="center")
        topLabel.config(background=BGCOLOR_WHITE)
-       topLabel.grid(row= 0,column= 0, columnspan= 3, padx= 30, pady= 50)
+       topLabel.grid(row= 1,column= 0, columnspan= 3, padx= 30, pady= 50)
 
        buttonWidth = 300
        buttonHeight = 100
@@ -117,20 +139,22 @@ class GuiVend():
 
        dashButton.config(background= BGCOLOR_WHITE)
        dashButton.image = photoDashLogo
-       dashButton.grid(row= 1, column= 0, columnspan= 3, padx= 30, pady= 50)
+       dashButton.grid(row= 2, column= 0, columnspan= 3, padx= 30, pady= 50)
 
-       self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
+       self.defaultFooter().grid(row=3, column= 0, columnspan= 3, sticky="nsew")
+
        return
 
     def selectBeverageScreen(self):
          self.clear()
+         self.notificationBar()
          message = "select your\n favourite\n beverage"
          label = tk.Label(self.master, text = message.upper(),
                           font =('Verdana', 32, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
          label.config(background=BGCOLOR_WHITE)
-         label.grid(row=0, column=0, rowspan=1, columnspan=3, padx= 30, pady= 50)
+         label.grid(row=1, column=0, rowspan=1, columnspan=3, padx= 30, pady= 50)
 
          arrowWidth = 300
          arrowHeight = 150
@@ -141,19 +165,21 @@ class GuiVend():
          arrowLabel = tk.Label(self.master, image = photoAutoLogo)
          arrowLabel.image = photoAutoLogo
          arrowLabel.config(background= BGCOLOR_WHITE)
-         arrowLabel.grid(row= 1, column= 0, padx= 30, pady= 0)
+         arrowLabel.grid(row= 2, column= 0, padx= 30, pady= 0)
 
-         self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
+         self.defaultFooter().grid(row= 3, column= 0, columnspan= 3, sticky="nsew")
          return
 
     def paymentScreen(self, address, amount):
         self.clear()
+        self.notificationBar()
+
         topLabel = tk.Label(self.master, text = "SEND\n" + str(amount) +" DASH",
                           font =('Verdana', 30, 'bold','italic'),
                           foreground= DASHCOLOR,
-                              anchor="center")
+                          anchor="center")
         topLabel.config(background=BGCOLOR_WHITE)
-        topLabel.grid(row= 0, column= 0, columnspan= 3)
+        topLabel.grid(row= 1, column= 0, columnspan= 3)
 
 
         code = pyqrcode.create('dash:'+address+'?amount='+str(amount)+'&label=DLT&IS=1')
@@ -163,14 +189,14 @@ class GuiVend():
 
         qrCode = tk.Label(self.master,image=codeBMP, relief="flat")
         qrCode.image = codeBMP
-        qrCode.grid(row= 1, column= 0, columnspan= 3)
+        qrCode.grid(row= 2, column= 0, columnspan= 3)
 
         instructionLabel = tk.Label(self.master, text = "Scan QR code for\n payment".upper(),
                           font =('Verdana', 22, 'bold','italic'),
                           foreground= DASHCOLOR,
                           anchor="center")
         instructionLabel.config(background=BGCOLOR_WHITE)
-        instructionLabel.grid(row= 2, column= 0, columnspan= 3)
+        instructionLabel.grid(row= 3, column= 0, columnspan= 3)
 
 
         waitingTime = 45
@@ -182,13 +208,17 @@ class GuiVend():
                               anchor="center")
         timer.config(background=BGCOLOR_WHITE)
 
-        timer.grid(row=3, column=0, rowspan=1, columnspan=3, padx= 30, pady= 10)
+        timer.grid(row=4, column=0, rowspan=1, columnspan=3, padx= 30, pady= 10)
 
+        #DONE dretva
+        self.waitingThread = Timer(waitingTime+1, lambda: self.waitingScreen())
+        self.waitingThread.setDaemon(True)
+        self.waitingThread.start()
 
         return
 
     def paymentScreenTimer(self,count):
-        if count == 0:
+        if count == -1:
             self.master.after_cancel(self.paymentTimerId)
             return
 
@@ -199,25 +229,28 @@ class GuiVend():
 
     def waitingScreen(self):
         self.clear()
-        waitingTime = 15
-        self.waitingTimeVar.set(waitingTime)
-        self.master.after(1000, self.waitingScreenTimer, waitingTime-1)
-        timer = tk.Label(self.master, textvariable = self.waitingTimeVar,
-                          font =('Verdana', 30, 'bold','italic'),
-                          foreground= "red",
-                              anchor="center")
-        timer.config(background=BGCOLOR_WHITE)
+        self.notificationBar()
 
-        timer.grid(row=0, column=2, rowspan=1, columnspan=1, padx= 30, pady= 10)
 
         topLabel = tk.Label(self.master, text = "WAITING FOR \nFUNDS...",
-                          font =('Verdana', 26, 'bold','italic'),
+                          font =('Verdana', 30, 'bold','italic'),
                           foreground= DASHCOLOR,
                               anchor="center")
         topLabel.config(background=BGCOLOR_WHITE)
-        topLabel.grid(row=1, column=0, rowspan=1, columnspan=3, padx= 30, pady= 25)
+        topLabel.grid(row=1, column=0, rowspan=1, columnspan=3)
 
-        self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
+        waitingTime = 15
+        self.waitingTimeVar.set(waitingTime)
+        self.master.after(1000, self.waitingScreenTimer, waitingTime-1)
+
+        timer = tk.Label(self.master, textvariable = self.waitingTimeVar,
+                          font =('Verdana', 26, 'bold','italic'),
+                          foreground= "red",
+                              anchor="center")
+        timer.config(background=BGCOLOR_WHITE)
+        timer.grid(row=2, column=0, rowspan=1, columnspan=3, pady= 10)
+
+        self.defaultFooter().grid(row= 3, column= 0, columnspan= 3, sticky="nsew")
         return
 
     def waitingScreenTimer(self,count):
@@ -233,12 +266,14 @@ class GuiVend():
 
     def finalScreen(self):
         self.clear()
+        self.notificationBar()
+
         topLabel = tk.Label(self.master, text = "THANK YOU!",
                           font =('Verdana', 32, 'bold','italic'),
                               foreground= DASHCOLOR,anchor="center")
 
         topLabel.config(background=BGCOLOR_WHITE)
-        topLabel.grid(row=0, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
+        topLabel.grid(row=1, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
 
         self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
         return
@@ -281,6 +316,21 @@ class GuiVend():
         qibixxLabel.grid(row= 0, column= 2, padx= 30, pady= 0)
 
         return frame
+
+    def notificationBar(self):
+       self.notiBar = tk.Canvas(self.master, width=480, height=100,  bd=0,
+                                  highlightthickness=0, relief='ridge')
+       self.notiBar.create_rectangle(0, 0, 480, 100, fill=BGCOLOR_WHITE)
+       self.notiBar.grid(row=0, column=0,  columnspan= 3, sticky = "N")
+
+    def notification(self, msg):
+       rect_id = self.notiBar.create_rectangle(0, 0, 480, 100, fill=NOTIFICATION_BGCOLOR)
+       text_id = self.notiBar.create_text(240, 50, fill="#0b0f3b",
+                          font="Vedrana 18 italic bold", justify=tk.CENTER, text=msg)
+
+       self.notiBar.after(7000, lambda: self.notiBar.delete(rect_id))
+       self.notiBar.after(7000, lambda: self.notiBar.delete(text_id))
+       return
 
     def clear(self):
         for widget in self.master.winfo_children():

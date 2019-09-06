@@ -319,12 +319,14 @@ class GuiVend():
 
     def notificationBar(self):
        self.notiBar = tk.Canvas(self.master, width=480, height=100,  bd=0,
-                                  highlightthickness=0, relief='ridge')
-       self.notiBar.create_rectangle(0, 0, 480, 100, fill=BGCOLOR_WHITE)
+                                  highlightthickness=0, relief='flat')
+       self.notiBar.create_rectangle(0, 0, 480, 100, fill=BGCOLOR_WHITE,
+                                     outline = "")
        self.notiBar.grid(row=0, column=0,  columnspan= 3, sticky = "N")
 
     def notification(self, msg):
-       rect_id = self.notiBar.create_rectangle(0, 0, 480, 100, fill=NOTIFICATION_BGCOLOR)
+       rect_id = self.notiBar.create_rectangle(0, 0, 480, 100, fill=NOTIFICATION_BGCOLOR,
+                                                outline="")
        text_id = self.notiBar.create_text(240, 50, fill="#0b0f3b",
                           font="Vedrana 18 italic bold", justify=tk.CENTER, text=msg)
 

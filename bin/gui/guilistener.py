@@ -4,7 +4,7 @@
 import queue
 import threading
 import socket
-from . priorityentry import PriorityEntry
+from priorityentry.priorityentry import PriorityEntry
 
 class GuiListener(threading.Thread):
     def __init__(self, port, dataQueue, loop_time = 1.0/60):

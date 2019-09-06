@@ -7,7 +7,7 @@ import time
 import serial
 import select
 import sys
-from . priorityentry import PriorityEntry
+from priorityentry.priorityentry import PriorityEntry
 
 class PiHatListener(threading.Thread):
     subscribed = False

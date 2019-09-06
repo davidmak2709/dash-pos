@@ -4,7 +4,7 @@ import struct
 import time
 import threading
 import queue
-from . priorityentry import PriorityEntry
+from priorityentry.priorityentry import PriorityEntry
 
 class DashZMQ(threading.Thread):
 

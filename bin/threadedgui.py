@@ -275,7 +275,7 @@ class GuiVend():
         topLabel.config(background=BGCOLOR_WHITE)
         topLabel.grid(row=1, column=0, rowspan=2, columnspan=3, padx= 30, pady= 50)
 
-        self.defaultFooter().grid(row= 2, column= 0, columnspan= 3, sticky="nsew")
+        self.defaultFooter().grid(row= 3, column= 0, columnspan= 3, sticky="nsew")
         return
 
     def defaultFooter(self):

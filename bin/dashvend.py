@@ -25,7 +25,6 @@ from gui.guilistener import GuiListener
 from bitcoinrpc.authproxy import JSONRPCException
 
 start_time = 0
-waiting_transaction = False
 
 def conversion(config, amount):
     config.read(DASHVEND_DIR + '/bin/conversion/rates.ini')
@@ -92,6 +91,7 @@ if __name__ == "__main__":
     #DONE
     dashzmq.setDaemon(True)
     dashzmq.start()
+    waiting_transaction = False
 
     while True:
         msg = dataQueue.get().data
@@ -106,9 +106,9 @@ if __name__ == "__main__":
                 time.sleep(10)
             c.sendMessage('idleScreen')
 
-        if int(time.time() - start_time) >= 60:
+        if int(time.time() - start_time) >= 60 and waiting_transaction:
             phl.onThread(phl.declineVending)
-
+            waiting_transaction = False
 
         if 'error' in msg.keys():
             if msg['error'] == 'cashless':
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 
             c.sendMessage('paymentScreen-' + vend.current_address + '-' + str(dash_amount))
             start_time = time.time()
-
+            waiting_transaction = True
 
         if 'transaction' in msg.keys():
             try:
@@ -161,13 +161,16 @@ if __name__ == "__main__":
                     if int(time.time() - start_time) < 60:
                         retVal = vend.process_IS_transaction(transaction)
                         #TODO logika za preplaćeni iznos
-                        if retVal:
+                        if retVal == 'valid' or retVal == 'over':
                             phl.onThread(phl.confirmVending)
                             start_time = 0
+                            waiting_transaction = False
                             c.sendMessage('finalScreen')
+                            if retVal == 'over':
+                                c.sendMessage('overpaid')
                             post_api(choice, amount, dash_amount)
                             time.sleep(30)
-                        else:
+                        elif retVal == 'under':
                             #DONE manji iznos
                             c.sendMessage('refund')
                     else:

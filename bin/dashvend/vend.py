@@ -24,7 +24,7 @@ class Vend(object):
 
     def get_next_address(self, increment=False):
         """ payment address to monitor """
-        self.current_address = self.addressGen.get_next_address(increment)
+        self.current_address = self.addressGen.get_next_address()
 
     def set_product_cost(self, cost):
         """ set required float value to trigger sale """
@@ -34,7 +34,7 @@ class Vend(object):
 
     def process_IS_transaction(self, tx):
         if float(tx["amount"]) == self.cost:
-            return True
+            return "valid"
         else:
             return self._refund(tx)
 
@@ -42,13 +42,13 @@ class Vend(object):
         amount = float(tx["amount"])
         address = self.select_return_address(tx["txid"])
         if amount < 0:
-            return False
+            return "invalid"
         elif amount < self.cost:
             self.sendtoaddress(addr=address, amount=amount)
-            return False
+            return "under"
         elif amount > self.cost:
             self.sendtoaddress(addr=address, amount=amount-self.cost)
-            return True
+            return "over"
 
     def _refundall(self, tx):
         amount = float(tx["amount"])

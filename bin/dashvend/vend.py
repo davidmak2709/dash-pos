@@ -52,9 +52,11 @@ class Vend(object):
 
     def _refundall(self, tx):
         amount = float(tx["amount"])
+        if amount <= 0:
+            return False
         address = self.select_return_address(tx["txid"])
         self.sendtoaddress(addr=address, amount=amount)
-        return False
+        return True
 
     def sendtoaddress(self, addr, amount):
         p = self.dashrpc._proxy

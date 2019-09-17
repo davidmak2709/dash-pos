@@ -175,9 +175,9 @@ if __name__ == "__main__":
                             c.sendMessage('refund')
                     else:
                         #DONE neočekivani
-                        c.sendMessage('unexpected')
-                        vend._refundall(transaction)
-
+                        retVal =  vend._refundall(transaction)
+                        if retVal:
+                            c.sendMessage('unexpected')
             except JSONRPCException as e:
                 info(e)
 
